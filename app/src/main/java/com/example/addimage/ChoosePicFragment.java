@@ -72,7 +72,19 @@ public class ChoosePicFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_choose_pic, container, false);
     }
 
-    public void ChoosePic(View view){
+    @Override
+    public void onStart() {
+        super.onStart();
+        ivProfile = getView().findViewById(R.id.ivProfilePicChoose);
+        ivProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ChoosePic();
+            }
+        });
+    }
+
+    public void ChoosePic(){
         Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(galleryIntent, GALLERY_REQUEST_CODE);
     }
@@ -88,5 +100,5 @@ public class ChoosePicFragment extends Fragment {
         }
 
 
-}
+    }
 }
