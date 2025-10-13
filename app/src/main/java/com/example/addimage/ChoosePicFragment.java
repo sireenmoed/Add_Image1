@@ -1,11 +1,14 @@
 package com.example.addimage;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
@@ -23,9 +26,19 @@ import com.squareup.picasso.Picasso;
  * create an instance of this fragment.
  */
 public class ChoosePicFragment extends Fragment {
+    private ImageView imageView;
+
+    private final ActivityResultLauncher<Intent> pickImageLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    Uri imageUri = result.getData().getData();
+                    imageView.setImageURI(imageUri);
+                }
+            });
 
     private static final int GALLERY_REQUEST_CODE = 123;
-    private ImageView ivProfile;
+    //private ImageView ivProfile;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -70,39 +83,21 @@ public class ChoosePicFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_choose_pic, container, false);
+        View view = inflater.inflate(R.layout.fragment_choose_pic, container, false);
+        imageView = view.findViewById(R.id.ivProfilePicChoose);
+        imageView.setOnClickListener(v -> openGallery());
+
+        return view;
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        ivProfile = getView().findViewById(R.id.ivProfilePicChoose);
-        ivProfile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ChoosePic();
-            }
-        });
+
     }
 
-    public void ChoosePic(){
-        Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(galleryIntent, GALLERY_REQUEST_CODE);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == GALLERY_REQUEST_CODE && resultCode == getActivity().RESULT_OK && data != null) {
-            Uri selectedImageUri = data.getData();
-            Picasso.get()
-                    .load(selectedImageUri)  // Provide the URI
-                    .into(ivProfile);
-            //ivProfile.setImageURI(selectedImageUri);
-        }
-
-
+    private void openGallery() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        pickImageLauncher.launch(intent);
     }
 }
